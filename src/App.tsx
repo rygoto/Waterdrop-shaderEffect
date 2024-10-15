@@ -25,7 +25,7 @@ function App() {
         <color attach="background" args={['#000']} />
         <Suspense fallback={null}>
           <OrbitControls />
-          <CollisionSettting />
+          {/*<CollisionSettting />*/}
           <ScreenPlane />
         </Suspense>
       </Canvas>

@@ -1,6 +1,6 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import * as THREE from 'three'
-import { Plane, useTexture } from '@react-three/drei'
+import { Plane, Sphere, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { datas } from './Data'
 //import { vertexShader, fragmentShader } from './shaders'
@@ -9,10 +9,7 @@ export const ScreenPlane: FC = () => {
 
 
     const { viewport } = useThree()
-    //const texture = useTexture('/wlop.jpg')
     const texture = useTexture('/no05-super-169.jpg')
-    //const texture = useTexture(publicPath('/assets/images/wlop.jpg'))
-    //texture.encoding = THREE.sRGBEncoding
     texture.wrapS = THREE.MirroredRepeatWrapping
     texture.wrapT = THREE.MirroredRepeatWrapping
 
@@ -20,6 +17,10 @@ export const ScreenPlane: FC = () => {
     const aspect = viewport.aspect
     const ratio = aspect / textureAspect
     const [x, y] = aspect < textureAspect ? [ratio, 1] : [1, 1 / ratio]
+
+    const texture2 = useTexture('/sky.png')
+    texture2.wrapS = THREE.MirroredRepeatWrapping
+    texture2.wrapT = THREE.MirroredRepeatWrapping
 
     const shader: THREE.ShaderMaterialParameters = {
         uniforms: {
@@ -30,8 +31,43 @@ export const ScreenPlane: FC = () => {
         },
         vertexShader,
         fragmentShader,
+        side: THREE.DoubleSide,
     }
 
+    useEffect(() => {
+        datas.forEach((data) => {
+            data.position.x = THREE.MathUtils.randFloat(8, -8); // xをランダムに設定
+            data.position.y = THREE.MathUtils.randFloat(5, -5) // yをランダムに設定
+            // ランダムなスピードを設定
+        });
+    }, []);
+
+    useFrame(() => {
+        datas.forEach((data) => {
+            const speed = THREE.MathUtils.randFloat(0.05, 0.06)
+            data.position.y += speed; // y をランダムスピードで上昇
+            data.position.x += THREE.MathUtils.randFloat(-0.01, 0.01);// x をランダムに揺らす
+            data.position.z += THREE.MathUtils.randFloat(-0.01, 0.01);
+
+            // y が一定値を超えたら下に戻す
+            if (data.position.y > 10) {
+                data.position.y = -8; // 再び下から出現させる
+                data.position.x = THREE.MathUtils.randFloat(8, -8); // x座標もランダムリセット
+                //speed = getRandom(0.01, 0.05); // 新しいランダムスピードを設定
+            }
+        });
+    });
+
+    /*useFrame(() => {
+        //datas[0].position.y += 1.0;
+        //datas[0].position.y = Math.cos(performance.now() / 1000) * 5
+        datas.map((data, i) => {
+            data.position.y += 0.01
+            data.position.x = Math.cos(performance.now() / 1000) * 5
+            data.position.z = Math.sin(performance.now() / 1000) * 5
+            //data.scale = Math.abs(Math.sin(performance.now() / 1000))
+        })
+    });*/
 
     useFrame(() => {
         datas.forEach((data, i) => {
@@ -40,10 +76,19 @@ export const ScreenPlane: FC = () => {
     })
 
     return (
-        <Plane args={[1, 1]} scale={[viewport.width, viewport.height, 1]}>
-            <shaderMaterial attach="material" args={[shader]} />
-        </Plane>
+        <>
+            <ambientLight intensity={3.5} />
+            <Plane args={[1, 1]} scale={[viewport.width, viewport.height * 0.9, 1]} position={[0, 0, -0.01]}>
+                <meshStandardMaterial attach="material" map={texture2} />
+            </Plane>
+            <Plane args={[1, 1]} scale={[viewport.width, viewport.height, 1]}>
+                <shaderMaterial attach="material" args={[shader]} transparent={true} />
+            </Plane>
+        </>
     )
+    {/* < Sphere args={[40, 64, 64]} scale={[1, 1, 1]} >
+            <shaderMaterial attach="material" args={[shader]} />
+        </Sphere >*/}
 }
 
 const vertexShader = `
@@ -62,7 +107,7 @@ struct Data {
 };
 
 uniform float u_aspect;
-uniform Data u_datas[5];
+uniform Data u_datas[16];
 uniform sampler2D u_texture;
 uniform vec2 u_uvScale;
 varying vec2 v_uv;
@@ -76,18 +121,17 @@ float onSmoothUnion(float d1, float d2, float k){
         return mix(d2, d1, h) - k * h * (1.0 - h);
     }  
 
-
-
 float sdf(vec3 p){
     vec3 correct = vec3(u_aspect, 1.0, 1.0) * vec3(0.08, 0.15, 0.2);
 
     vec3 pos = p + -u_datas[0].position * correct;
     float final = sdSphere(pos, u_datas[0].scale); 
 
-    for(int i = 1; i < 5; i++){
+    for(int i = 1; i < 16; i++){
         pos = p + -u_datas[i].position * correct;
-        float sphere = sdSphere(pos, 0.2 * u_datas[i].scale);
-        final = onSmoothUnion(final, sphere, 0.4);
+        float sphere = sdSphere(pos, 0.2 * u_datas[i].scale * 1.6);
+        final = onSmoothUnion(final, sphere, 0.05);//0.4
+        //final =  min(final, sphere);
     }
     return final;
 }
@@ -125,7 +169,10 @@ void main(){
 
     vec2 uv = (v_uv - 0.5) * u_uvScale + 0.5;
     vec4 tex = texture2D(u_texture, uv);
-    tex = vec4(vec3((tex.r + tex.g + tex.b) / 3.0), tex.a);
+    //tex = vec4(vec3((tex.r + tex.g + tex.b) / 3.0), tex.a);//これが少し暗くなって良い
+    //tex = vec4(0.0, 0.0, 0.0, tex.a);
+    //tex = vec4(tex.rgb, 0.3);
+    tex = vec4(tex.rgb, 0.0);
     vec4 outgoing = tex;
 
     if(totalDist < tMax){
@@ -141,6 +188,4 @@ void main(){
     }
     gl_FragColor = outgoing;
 }
-
-
 `;

@@ -33,7 +33,7 @@ const Collisions: FC = () => {
 }
 
 const PhysicalSphere: FC<{ data: Data }> = ({ data }) => {
-    const scale = data.scale
+    const scale = data.scale / 2.0
 
     const [ref, api] = useSphere(() => ({
         mass: 1,
@@ -55,6 +55,10 @@ const PhysicalSphere: FC<{ data: Data }> = ({ data }) => {
                 .multiplyScalar(-scale * 30)
 
             return api.applyForce(vec.toArray(), [0, 0, 0])
+
+            /*const windStrngth = 10;
+            vec.set(windStrngth, 0, 0);
+            api.applyForce(vec.toArray(), [0, 0, 0])*/
         })
 
         return () => {
