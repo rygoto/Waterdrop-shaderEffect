@@ -24,7 +24,7 @@ export const ScreenPlane: FC = () => {
     texture2.wrapS = THREE.MirroredRepeatWrapping
     texture2.wrapT = THREE.MirroredRepeatWrapping
 
-    const shader: THREE.ShaderMaterialParameters = {
+    const shader = {
         uniforms: {
             u_aspect: { value: viewport.aspect },
             u_datas: { value: datas },
@@ -34,7 +34,7 @@ export const ScreenPlane: FC = () => {
         vertexShader,
         fragmentShader,
         side: THREE.DoubleSide,
-    }
+    } as const;
 
     useEffect(() => {
         datas.forEach((data) => {
