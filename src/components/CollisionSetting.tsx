@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import * as THREE from 'three';
 import { Physics, usePlane, useSphere } from '@react-three/cannon';
 import { useFrame } from '@react-three/fiber';
@@ -35,7 +35,7 @@ const Collisions: FC = () => {
 const PhysicalSphere: FC<{ data: Data }> = ({ data }) => {
     const scale = data.scale / 2.0
 
-    const [ref, api] = useSphere(() => ({
+    const [, api] = useSphere(() => ({
         mass: 1,
         angularDamping: 0.1,
         linearDamping: 0.95,

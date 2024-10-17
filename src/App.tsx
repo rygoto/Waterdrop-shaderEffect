@@ -1,11 +1,9 @@
-import React, { FC, Suspense } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Suspense } from 'react'
 import './App.css'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { ScreenPlane } from '../src/components/ScreenPlane'
-import { CollisionSettting } from './components/CollisionSetting'
+//import { CollisionSettting } from './components/CollisionSetting'
 import { css } from '@emotion/css'
 
 function App() {

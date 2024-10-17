@@ -1,6 +1,6 @@
-import React, { FC, useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import * as THREE from 'three'
-import { Plane, Sphere, useTexture } from '@react-three/drei'
+import { Plane, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { datas } from './Data'
 //import { vertexShader, fragmentShader } from './shaders'
@@ -9,7 +9,8 @@ export const ScreenPlane: FC = () => {
 
 
     const { viewport } = useThree()
-    const texture = useTexture('/no05-super-169.jpg')
+    //const texture = useTexture('/no05-super-169.jpg')
+    const texture = useTexture('/city1-1.jpg')
     texture.wrapS = THREE.MirroredRepeatWrapping
     texture.wrapT = THREE.MirroredRepeatWrapping
 
@@ -18,7 +19,8 @@ export const ScreenPlane: FC = () => {
     const ratio = aspect / textureAspect
     const [x, y] = aspect < textureAspect ? [ratio, 1] : [1, 1 / ratio]
 
-    const texture2 = useTexture('/sky.png')
+    //const texture2 = useTexture('/sky.png')
+    const texture2 = useTexture('/city1-2.jpg')
     texture2.wrapS = THREE.MirroredRepeatWrapping
     texture2.wrapT = THREE.MirroredRepeatWrapping
 
@@ -36,7 +38,7 @@ export const ScreenPlane: FC = () => {
 
     useEffect(() => {
         datas.forEach((data) => {
-            data.position.x = THREE.MathUtils.randFloat(8, -8); // xをランダムに設定
+            data.position.x = THREE.MathUtils.randFloat(12, -12); // xをランダムに設定
             data.position.y = THREE.MathUtils.randFloat(5, -5) // yをランダムに設定
             // ランダムなスピードを設定
         });
@@ -46,13 +48,16 @@ export const ScreenPlane: FC = () => {
         datas.forEach((data) => {
             const speed = THREE.MathUtils.randFloat(0.05, 0.06)
             data.position.y += speed; // y をランダムスピードで上昇
+            //data.position.z -= speed; // z をランダムスピードで上昇
+            //data.position.x += speed; // x をランダムスピードで上昇
             data.position.x += THREE.MathUtils.randFloat(-0.01, 0.01);// x をランダムに揺らす
             data.position.z += THREE.MathUtils.randFloat(-0.01, 0.01);
 
             // y が一定値を超えたら下に戻す
             if (data.position.y > 10) {
                 data.position.y = -8; // 再び下から出現させる
-                data.position.x = THREE.MathUtils.randFloat(8, -8); // x座標もランダムリセット
+                data.position.z = 0;
+                data.position.x = THREE.MathUtils.randFloat(12, -12); // x座標もランダムリセット
                 //speed = getRandom(0.01, 0.05); // 新しいランダムスピードを設定
             }
         });
@@ -77,7 +82,7 @@ export const ScreenPlane: FC = () => {
 
     return (
         <>
-            <ambientLight intensity={3.5} />
+            <ambientLight intensity={1.5} />
             <Plane args={[1, 1]} scale={[viewport.width, viewport.height * 0.9, 1]} position={[0, 0, -0.01]}>
                 <meshStandardMaterial attach="material" map={texture2} />
             </Plane>
@@ -180,7 +185,7 @@ void main(){
         float f = fresnel(ray, normal);
 
         float len = pow(length(normal.xy), 3.0);
-        uv += normal.xy * len * 0.1;
+        uv += normal.xy * len * 0.1 * 0.8;
 
         tex = texture2D(u_texture, uv);
         tex += f * 0.3;
