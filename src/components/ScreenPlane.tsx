@@ -46,7 +46,7 @@ export const ScreenPlane: FC = () => {
 
     useFrame(() => {
         datas.forEach((data) => {
-            const speed = THREE.MathUtils.randFloat(0.05, 0.06)
+            const speed = THREE.MathUtils.randFloat(0.12, 0.08)
             data.position.y += speed; // y をランダムスピードで上昇
             //data.position.z -= speed; // z をランダムスピードで上昇
             //data.position.x += speed; // x をランダムスピードで上昇
